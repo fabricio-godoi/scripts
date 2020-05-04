@@ -40,6 +40,6 @@ Usage example:
 source ./bash/versioner
 configure
 get_version $(pwd)/my_file.yaml
-NEXT_VERSION=$(next_version $(pwd)/my_file.yaml)
+NEXT_VERSION=$(next_version $(pwd)/my_file.yaml major)
 set_version $(pwd)/my_file.yaml $NEXT_VERSION
 ```
