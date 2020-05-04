@@ -1,0 +1,14 @@
+#!/bin/sh
+
+function install {
+  if [ -z "$@" ]; then echo "error: No program provided to install" 2>&1; exit 1; fi
+  source /etc/os-release
+  case $ID_LIKE in
+  debian) apt update && apt install -y $@ ;;
+  arch) pamac install --no-confirm $@ ;;
+  alpine) apk --update -y $@ ;;
+  centos) yum install -y $@ ;;
+  fedora) dnf install -y $@ ;;
+  *) echo "error: Unknwon distro" 2>&1
+  esac
+}

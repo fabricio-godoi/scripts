@@ -1,0 +1,144 @@
+#!/bin/bash
+## This script has a set off tools to help control software version in .json and .yaml files.
+## 
+## configure: Configure the Linux distro with the tools needed to run 
+##
+## get_version: Returns the sofware version from yaml or json files
+##      Example: get_version __my_file__.json
+##
+## set_version: Update the version parameter in the file from given version parameter
+##      Example: set_version __my_file__.json 1.2.3+4
+##
+## next_version: Increase de version in the file given the stage (develop, staging or production)
+##      Example: next_version __my_file__.json staging
+
+if [ -z $(command -v yq) ] || [ -z $(command -v jq) ]; then
+  echo "Dependencies not found, run $0 configure first"; 2>&1
+  exit 1;
+fi
+
+## Check for Linux distribution and install dependencies from package manager
+function configure {
+  local basedir=$(dirname "$0")
+  source $basedir/universal_install
+  source /etc/os-release
+  if [ -z $(command -v yq) -o -z $(command -v jq) ]; then
+    if [ $ID_LIKE = debian ]; then sudo add-apt-repository -y ppa:rmescandon/yq ppa:clock/jq ; fi
+    install yq jq
+  else
+    echo "$0 is already configured"
+  fi
+}
+
+## This method retrieve the current version from json or yaml version
+## $1 must be the full file path
+function get_version {
+    local file=$1
+    
+    # Check for inputs errors
+    if [ ! -f $file ]; then echo "Could not find $file" 1>&2 ; exit 1; fi
+    local extension=${file##*.}
+    
+    # Process
+    if [ $extension = yml -o $extension = yaml ]; then yq r $file version ;
+    elif [ $extension = json ]; then jq -r '.version' $file ;
+    else
+        echo "File format $extension not supported, change to yaml or json" 1>&2 ;
+        exit 1;
+    fi
+}
+
+## This method update the version in the json or yaml file
+## $1 must be the full file path
+## $2 must be the version in the following format [0-9].[0-9].[0-9] or [0-9].[0-9].[0-9]+[0-9]
+function set_version {
+    local file=$1
+    local version=$2
+    
+    # Check for inputs errors
+    if [ ! -f $file ]; then echo "Could not find $file" 1>&2 ; exit 1; fi
+    local extension=${file##*.}
+
+    local version_check=${version//[0-9]/}
+    if [ ! $version_check = "..+" -a ! $version_check = ".." ]; then
+        echo "Version $version format not supported. Change to 1.2.3 or 1.2.3+4." 1>&2 ;
+        exit 1;
+    fi
+    
+    # Process
+    if [ $extension = yml -o $extension = yaml ]; then yq w -i $file version $version ;
+    elif [ $extension = json ]; then
+        local file_name=$(basename $file)
+        echo version  $version
+        jq --arg version "$version" '.version = $version' $file > /tmp/$file_name
+        if [ ! -s /tmp/$file_name ]; then echo "Could not update the $file_name" 1>&2 ; exit 1 ; fi
+        mv -f /tmp/$file_name $file
+    else
+        echo "File format $extension not supported, change to yaml or json" 1>&2 ;
+        exit 1;
+    fi
+}
+
+
+function file_check {
+  echo "error" 1>&2
+  exit 1  
+}
+
+## This method calculates the next version for given stage as follow {major}.{minor}.{patch}+{build}
+## $1 must be the full file path
+## $2 must be one of the following: major, minor, release or build
+function next_version {
+    set -e
+    local file=$1
+    local stage=$2
+
+    # Get current version
+    get_version $file
+    local version=$(get_version $file)
+    echo "$version" 
+    # [ $? -eq 0 ] || exit 1
+    local build_number=
+    ## Parse input version
+    if [[ $version = *+* ]]; then
+        build_number=${version##*+}
+        version=${version%%+*}
+    fi
+    local major=${version%%.*}
+    local minor=$(echo $version | cut -d'.' -f 2)
+    local patch=${version##*.}
+
+    echo $major $minor $patch $build_number
+
+    ## Bump version by stage
+    case $stage in
+    build)
+      if [ -z $build_number ]; then build_number=1 ;
+      else build_number=$((build_number + 1)) ; fi
+      ;;
+    patch)
+      build_number=
+      patch=$((patch + 1))
+      ;;
+    minor)
+      build_number=
+      patch=0
+      minor=$((minor + 1))
+      ;;
+    major)
+      build_number=
+      patch=0
+      minor=0
+      major=$((major + 1))
+      ;;
+    *)
+     echo "Unkown stage \"$stage\", provide one of the following: [develop, dev, stag, staging, prod, production or master]" 1>&2;
+     return
+     ;;
+    esac
+
+    ## Generate new version and persist in file
+    local new_version=$major.$minor.$patch
+    if [ ! -z $build_number ]; then new_version=$new_version+$build_number ; fi
+    echo $new_version
+}
