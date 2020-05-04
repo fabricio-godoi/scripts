@@ -80,11 +80,6 @@ function set_version {
 }
 
 
-function file_check {
-  echo "error" 1>&2
-  exit 1  
-}
-
 ## This method calculates the next version for given stage as follow {major}.{minor}.{patch}+{build}
 ## $1 must be the full file path
 ## $2 must be one of the following: major, minor, release or build
