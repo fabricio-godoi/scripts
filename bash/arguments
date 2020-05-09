@@ -4,15 +4,15 @@ __HELP__="
    Bash multiple argments input reader example
    Parameters:
       help|--help|-h                Show this message
-      xpto1=value1                  Get value1 from variable xpto1
-      xpto2                         Check if the xpto2 was provided
-      xpto3 value3                  Get value3 for argument xpto3
-                                    Note: in this form, value3 cannot be equal xpto3. eg: $0 xpto3 xpto3
+      foo1=bar1                     Get bar1 from variable foo1
+      foo2                          Check if the foo2 was provided
+      foo3 bar3                     Get bar3 for argument foo3
+                                    Note: in this form, bar3 cannot be equal foo3. eg: $0 foo3 foo3
 
    Obs.: if any of this parameter is not given in the property, it will be prompt when script is running
    Examples.:
-      $0 xpto1=abc xpto2 xpto3 value3
-      $0
+      $0 foo1=abc foo2 foo3 bar3
+      $0 # This will show the help message as well
       $0 help
 "
 
@@ -25,12 +25,12 @@ for i in "${!__arguments__[@]}"; do
       -h | --help | help)
          echo "$__HELP__"
          exit 0;;
-      xpto1=*) xpto1=${arg##*=};;
-      xpto2) xpto2=$arg;;
-      xpto3) xpto3=${__arguments__[$i+1]}
+      foo1=*) foo1=${arg##*=};;
+      foo2) foo2=$arg;;
+      foo3) foo3=${__arguments__[$i+1]}
    esac
 done
 
-if [ ! -z $xpto1 ]; then echo "The value for arg xpto1 is $xpto1"; fi
-if [ ! -z $xpto2 ]; then echo "Argument xpto2 was provided"; fi
-if [ ! -z $xpto3 ]; then echo "Value of xpto3 is $xpto3"; fi
+if [ ! -z $foo1 ]; then echo "The value for arg foo1 is $foo1"; fi
+if [ ! -z $foo2 ]; then echo "Argument foo2 was provided"; fi
+if [ ! -z $foo3 ]; then echo "Value of foo3 is $foo3"; fi
