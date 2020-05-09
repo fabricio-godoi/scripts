@@ -1,0 +1,36 @@
+#!/bin/bash
+
+__HELP__="
+   Bash multiple argments input reader example
+   Parameters:
+      help|--help|-h                Show this message
+      xpto1=value1                  Get value1 from variable xpto1
+      xpto2                         Check if the xpto2 was provided
+      xpto3 value3                  Get value3 for argument xpto3
+                                    Note: in this form, value3 cannot be equal xpto3. eg: $0 xpto3 xpto3
+
+   Obs.: if any of this parameter is not given in the property, it will be prompt when script is running
+   Examples.:
+      $0 xpto1=abc xpto2 xpto3 value3
+      $0
+      $0 help
+"
+
+# Read parameters given in the script in the format xpto=abc
+if [ $# -eq 0 ]; then echo "$__HELP__" ; exit 0 ; fi
+__arguments__=("$@")
+for i in "${!__arguments__[@]}"; do
+   arg=${__arguments__[$i]}
+   case $arg in
+      -h | --help | help)
+         echo "$__HELP__"
+         exit 0;;
+      xpto1=*) xpto1=${arg##*=};;
+      xpto2) xpto2=$arg;;
+      xpto3) xpto3=${__arguments__[$i+1]}
+   esac
+done
+
+if [ ! -z $xpto1 ]; then echo "The value for arg xpto1 is $xpto1"; fi
+if [ ! -z $xpto2 ]; then echo "Argument xpto2 was provided"; fi
+if [ ! -z $xpto3 ]; then echo "Value of xpto3 is $xpto3"; fi
