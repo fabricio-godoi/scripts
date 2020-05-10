@@ -6,6 +6,18 @@ Many scripts for many luanguages and purposes
 Scripts for Bash
 
 
+## Arguments
+
+Example script for parsing arguments for another scripts. It shows how to get values from arguments in the following schema:
+
+```sh
+script foo1=bar1 foo2 foo3 bar3
+script help | --help | -h
+```
+
+Which "foo1" have value "bar1", "foo2" have been defined and "foo3" have the value "bar3". Also, it shows how to check the parameters to show a helpper message for the user.
+
+
 ### Universal Install
 
 This script is intended to provide a method to check which linux distro is running and use the propper package manager to install de dependency. Note that if the package manager does not known the package that it is intended to install, it will return its error.
@@ -15,6 +27,7 @@ Usage example:
 source ./bash/universal_install
 install sl # Try it for some fun =D
 ```
+
 
 ### Versioner
 
