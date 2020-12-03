@@ -56,3 +56,29 @@ get_version $(pwd)/my_file.yaml
 NEXT_VERSION=$(next_version $(pwd)/my_file.yaml major)
 set_version $(pwd)/my_file.yaml $NEXT_VERSION
 ```
+
+### Flutter
+
+Flutter commands to help development process, such as build, clean and test.
+
+```sh
+./flutter help
+
+   Generator for swagger files
+   Parameters:
+      help|--help|-h                Show this message
+      build                         Start flutter builder runner
+      watch                         Start flutter builder runner in watch mode
+      icons                         Update flutter launcher icons in Android and iOs
+      splash                        Update flutter splash screen in Android and iOs
+      bundle                        Create the Android bundle for release in store
+      apk                           Create the Android apk for release in test environment
+      ios                           Create release for iOS
+      build_version                 Get the build version from pubspec.yaml eg.: 1.2.3
+      build_number                  Get the build number from pubspec.yaml eg.: 1
+      test                          Run all unit test with coverage check
+      clean                         Run a command to clean all possible problem files and cache
+
+   Examples:
+      - ./flutter help
+```
